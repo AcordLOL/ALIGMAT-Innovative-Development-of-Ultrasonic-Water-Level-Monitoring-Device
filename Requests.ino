@@ -1,9 +1,8 @@
-void handleRequest(WiFiClient &serverClient) {
-  
+void handleRequest(WiFiClient &serverClient, String &request) {
   if (request.startsWith("GET /waterLevel")) {
     StaticJsonDocument<256> doc;
     
-    doc["waterLevel"] = 50;
+    doc["waterLevel"] = disFromWLevel;
 
     serverClient.println("HTTP/1.1 200 OK");
     serverClient.println("Content-type: application/json");
@@ -53,14 +52,6 @@ void handleRequest(WiFiClient &serverClient) {
     serverClient.println("HTTP/1.1 200 OK");
     serverClient.println("Connection: close");
     serverClient.println();
-    
-  // } else if (request.startsWith("POST /message")) {
-    
-  //   handleMessage();
-
-  //   serverClient.println("HTTP/1.1 200 OK");
-  //   serverClient.println("Connection: close");
-  //   serverClient.println();
     
   } else serverClient.println(configHTML);
 }

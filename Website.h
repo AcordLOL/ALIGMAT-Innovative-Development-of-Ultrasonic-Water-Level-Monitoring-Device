@@ -158,7 +158,6 @@ Connection: close
                 </div>
                 <input id="input_num" placeholder="Phone Number" type="text">
                 <div id="save" class="btn"><h3>Save</h3></div>
-                <div id="send" class="btn"><h3>Send</h3></div>
             </div>
         </div>
         <script>
@@ -180,7 +179,7 @@ Connection: close
             setTimeout(() => {
                 getNumbers();
                 updateNumbers();
-            }, 1000);
+            }, 10);
             
             document.getElementById("save").addEventListener("click", saveNumber);
             document.getElementById("send").addEventListener("click", sendMSG);

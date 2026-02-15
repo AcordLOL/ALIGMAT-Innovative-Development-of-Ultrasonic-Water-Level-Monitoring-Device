@@ -1,6 +1,4 @@
 int status = WL_IDLE_STATUS;
-String currentLine = "";
-String request = "";
 
 void configMode() {
   if (once) {
@@ -11,11 +9,14 @@ void configMode() {
 
     delay(1000);
     server.begin();
-    digitalWrite(config[1], HIGH);
+    // digitalWrite(config[1], HIGH);
   }
 
   WiFiClient serverClient = server.available();
   if (serverClient) {
+    String currentLine = "";
+    String request = "";
+
     while (serverClient.connected()) {
       delayMicroseconds(10);
       if (!serverClient.available()) continue;
@@ -30,14 +31,14 @@ void configMode() {
         request = currentLine;
 
       if (currentLine.length() == 0) {
-        handleRequest(serverClient);
-
+        handleRequest(serverClient, request);
+  
         break;
       } else {
         currentLine = "";
       }
     }
-    
+
     serverClient.stop();
   }
 }

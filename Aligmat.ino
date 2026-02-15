@@ -5,23 +5,25 @@
 
 #include "Website.h"
 
-const int baudRate = 9600;
+WiFiServer server(80);
+SoftwareSerial mySerial(10, 11);
 
 // btn, led, state, lstState
-int config[4] = {7, 6, LOW, LOW};
-bool isConfig = true;
+// int config[4] = {7, 6, LOW, LOW};
+// bool isConfig = true;
 
 bool once = true;
 bool hasError = false;
 
-WiFiServer server(80);
-SoftwareSerial mySerial(10, 11);
+int disFromWLevel = 100;
+
+const int baudRate = 9600;
 
 char phoneNumbers[10][11];
 
 void setup() {
-  pinMode(config[0], INPUT_PULLUP);
-  pinMode(config[1], OUTPUT);
+  // pinMode(config[0], INPUT_PULLUP);
+  // pinMode(config[1], OUTPUT);
 
   Serial.begin(baudRate);
   mySerial.begin(baudRate);
@@ -35,15 +37,18 @@ void setup() {
     handleError("Communication with WiFi module failed!");
   }
 
-  isConfig = EEPROM.read(0);
+  // isConfig = EEPROM.read(0);
   for (int i = 0; i < 10; i++) {
     handleNumbers(i+1);
   }
 }
 
 void loop() {
-  handleMode();
+  // handleMode();
+  configMode();
   getWaterLevel();
-  
+  alarmSystem();
+
+  Serial.println(disFromWLevel);
   once = false;
 }
