@@ -150,47 +150,51 @@ Connection: close
                 </div>
                 <div class="container stack" id="number">
                     <div class="tag">
-                    <h1>SMS Warning</h1>
-                    <p>The Flood Monitoring Device can warn users through SMS.<br>Provide Phone Numbers to Enable...</p>
+                        <h1>SMS Warning</h1>
+                        <p>The Flood Monitoring Device can warn users through SMS.<br>Provide phone numbers to enable...</p>
+                    </div>
+                    <div id="number_list" class="list">
+                        <h3>No Saved Numbers...</h3>
+                    </div>
+                    <input id="input_num" placeholder="Phone Number" type="text">
+                    <div id="save_number" class="btn">
+                        <h3>Save</h3>
+                    </div>
                 </div>
-                <div id="number_list" class="list">
-                    <h3>No Saved Numbers...</h3>
+                <div class="container stack" id="number">
+                    <div class="tag">
+                        <h1>WiFi Info</h1>
+                        <p>The Flood Monitoring Device requires WiFi to fully function.<br>Provide information to your network</p>
+                    </div>
+                    <div id="wifi_info" class="list">
+                        <h3>Not Connected...</h3>
+                    </div>
+                    <input id="input_ssid" placeholder="SSID / WiFi Name" type="text">
+                    <input id="input_pass" placeholder="Password" type="text">
+                    <div id="save_wifi" class="btn">
+                        <h3>Save</h3>
+                    </div>
                 </div>
-                <input id="input_num" placeholder="Phone Number" type="text">
-                <div id="save" class="btn"><h3>Save</h3></div>
             </div>
-        </div>
-        <script>
-            let savedNumbers = [
-                '0000000000',
-                '0000000000',
-                '0000000000',
-                '0000000000',
-                '0000000000',
-                '0000000000',
-                '0000000000',
-                '0000000000',
-                '0000000000',
-                '0000000000',
-            ];
-            // let savedNumbers = ['916965106', '916965101', '916965102', '916965103', '916965104', '916965105', '916965107', '916965108', '916965109', '916965144']
+            <script>
+            updateWifi()
+            let savedNumbers = [];
 
             setInterval(getWaterLevel, 1000);
             setTimeout(() => {
-                getNumbers();
-                updateNumbers();
+                getInfo();
             }, 10);
             
             document.getElementById("save").addEventListener("click", saveNumber);
             document.getElementById("send").addEventListener("click", sendMSG);
             document.getElementById("input_num").addEventListener("keyup", function(event) {
                 if (event.key != "Enter") return;
-    
+                
                 event.preventDefault();
                 document.getElementById("save").click();
             })
 
-            function getNumbers() {
+            function getInfo() {
                 const Request = new XMLHttpRequest();
                 Request.onreadystatechange = function() {
                     if (this.readyState !== XMLHttpRequest.DONE || this.status !== 200) return;
@@ -207,7 +211,7 @@ Connection: close
                     updateNumbers();
                 };
                 
-                Request.open("GET", "numbers", true);
+                Request.open("GET", "info", true);
                 Request.send();
             };
 
@@ -226,7 +230,13 @@ Connection: close
                     num_list.innerHTML = "<h3>No Saved Numbers...</h3>"
                 }
             }
-            
+
+            function updateWifi(ssid, pass) {
+                const wifi_info = document.getElementById("wifi_info");
+                
+                wifi_info.innerHTML = `<h3>Wifi: Hi<br>Password: Hi</h3>`
+            }
+
             function deleteNumber(index) {
                 let coord = (index != 9) ? '0' : ''
                 coord += index+1
@@ -246,20 +256,6 @@ Connection: close
                 );
                 sendRequest.send();
             }
-
-            // function sendMSG() {
-            //     const sendRequest = new XMLHttpRequest();
-            //     sendRequest.onreadystatechange = function() {
-            //         if (this.readyState !== XMLHttpRequest.DONE || this.status !== 200) return;
-            //         console.log(this.responseType);
-            //     }
-            //     sendRequest.open(
-            //         "POST", 
-            //         `message`, 
-            //         true
-            //     );
-            //     sendRequest.send();
-            // }
 
             function saveNumber() {
                 let number = document.getElementById('input_num').value;

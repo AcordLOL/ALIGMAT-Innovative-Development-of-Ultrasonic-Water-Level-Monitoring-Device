@@ -28,8 +28,9 @@ void handleError(const char* msg) {
 void handleNumbers(int i) {
   int hasNum = EEPROM.read(i);
 
-  phoneNumbers[i-1][0] = hasNum;
-  for (int n = 0; n < 9; n++) {
+  if (!hasNum) return;
+  phoneNumbers[9][0] = hasNum;
+  for (int n = 0; n < 9;n++) {
       phoneNumbers[i-1][n+1] = (hasNum) ? EEPROM.read(i*9 + 2 + n) : '0';
   }
 
@@ -55,7 +56,7 @@ void alarmSystem() {
   if (disFromWLevel < threshold && !noAlarm) {
 
     digitalWrite(alarmLed, HIGH);
-    tone(8, 1000);
+    tone(speakerPin, 3000);
 
     // handleMessage();
   } else {
