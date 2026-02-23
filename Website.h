@@ -177,7 +177,6 @@ Connection: close
                 </div>
             </div>
             <script>
-            updateWifi()
             let savedNumbers = [];
 
             setInterval(getWaterLevel, 1000);
@@ -234,7 +233,7 @@ Connection: close
             function updateWifi(ssid, pass) {
                 const wifi_info = document.getElementById("wifi_info");
                 
-                wifi_info.innerHTML = `<h3>Wifi: Hi<br>Password: Hi</h3>`
+                wifi_info.innerHTML = `<h3>Wifi: ${ssid}<br>Password: ${pass}</h3>`
             }
 
             function deleteNumber(index) {
@@ -303,6 +302,28 @@ Connection: close
                 );
                 sendRequest.send();
             };
+
+            function saveWifi() {
+                const ssid = document.getElementById("input_ssid").value;
+                const pass = document.getElementById("input_pass").value;
+
+                const ssidLen = (ssid.length > 9) ? `${ssid.length}` : `0${ssid.length}`;
+                const passLen = (pass.length > 9) ? `${pass.length}` : `0${pass.length}`;
+
+                updateWifi(ssid, pass);
+
+                const sendRequest = new XMLHttpRequest();
+                sendRequest.onreadystatechange = function() {
+                    if (this.readyState !== XMLHttpRequest.DONE || this.status !== 200) return;
+                    console.log(this.responseType);
+                }
+                sendRequest.open(
+                    "POST",
+                    `updateWifi?${ssidLen}${ssid}${passLen}${pass}`,
+                    true
+                )
+                sendRequest.send();
+            }
             
             function getWaterLevel() {
                     const listRequest = new XMLHttpRequest();

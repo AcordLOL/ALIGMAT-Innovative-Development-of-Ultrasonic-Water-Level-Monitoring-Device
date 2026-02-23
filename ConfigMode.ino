@@ -3,9 +3,6 @@ int status = WL_IDLE_STATUS;
 void configMode() {
   if (once) {
     status = WiFi.beginAP("ALIGMAT", "Password");
-    if (status != WL_AP_LISTENING) {
-      handleError("Creating Access Point Failed.");
-    }
 
     delay(1000);
     server.begin();

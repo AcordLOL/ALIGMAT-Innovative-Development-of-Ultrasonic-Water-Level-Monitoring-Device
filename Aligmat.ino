@@ -6,11 +6,8 @@
 #include "Website.h"
 
 WiFiServer server(80);
-SoftwareSerial mySerial(10, 11);
-
-// btn, led, state, lstState
-// int config[4] = {7, 6, LOW, LOW};
-// bool isConfig = true;
+WiFiSSLClient client;
+R4HttpClient http;
 
 bool once = true;
 bool hasError = false;
@@ -20,6 +17,8 @@ int disFromWLevel = 100;
 const int baudRate = 9600;
 
 char phoneNumbers[10][11];
+char ssid[35];
+char pass[66];
 
 void setup() {
   // pinMode(config[0], INPUT_PULLUP);
@@ -49,6 +48,5 @@ void loop() {
   getWaterLevel();
   alarmSystem();
 
-  Serial.println(disFromWLevel);
   once = false;
 }

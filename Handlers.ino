@@ -18,6 +18,7 @@ void handleError(const char* msg) {
 //       EEPROM.write(0, isConfig);
       
 //       once = true;
+//       WiFi.stop();
 //     }
 //   }
 
@@ -84,30 +85,30 @@ void alarmSystem() {
   }
 }
 
-void handleMessage() {
-  mySerial.println("AT+CMGF=1");
-  Serial.println(readSerial());
-  for (int i = 0; i < 10; i++) {
-    if (!phoneNumbers[i][0]) continue;
+// void handleMessage() {
+//   mySerial.println("AT+CMGF=1");
+//   Serial.println(readSerial());
+//   for (int i = 0; i < 10; i++) {
+//     if (!phoneNumbers[i][0]) continue;
 
-    char setNum[24];
-    char num[10];
-    for (int n = 0; n < 9; n++) {
-      num[0] = phoneNumbers[i][n+1];
-    }
-    num[10] = '\0';
+//     char setNum[24];
+//     char num[10];
+//     for (int n = 0; n < 9; n++) {
+//       num[0] = phoneNumbers[i][n+1];
+//     }
+//     num[10] = '\0';
 
-    sprintf(setNum, "AT+CMGS=\"+639%s\"", num);
-    mySerial.println(setNum);
-    Serial.println(readSerial());
-    mySerial.println("ALIGMAT: Water Level Monitoring Device Warning!");
-    mySerial.println((char)26);
-  }
-}
+//     sprintf(setNum, "AT+CMGS=\"+639%s\"", num);
+//     mySerial.println(setNum);
+//     Serial.println(readSerial());
+//     mySerial.println("ALIGMAT: Water Level Monitoring Device Warning!");
+//     mySerial.println((char)26);
+//   }
+// }
 
-String readSerial() {
-  delay(100);
-  if (mySerial.available()) {
-    return mySerial.readString();
-  }
-}
+// String readSerial() {
+//   delay(100);
+//   if (mySerial.available()) {
+//     return mySerial.readString();
+//   }
+// }

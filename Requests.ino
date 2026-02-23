@@ -12,7 +12,7 @@ void handleRequest(WiFiClient &serverClient, String &request) {
     serializeJson(doc, serverClient);
     serverClient.println();
 
-  } else if (request.startsWith("GET /numbers")) {
+  } else if (request.startsWith("GET /info")) {
     StaticJsonDocument<256> doc;
 
     for (int i = 0; i < 10; i++) {
@@ -37,6 +37,26 @@ void handleRequest(WiFiClient &serverClient, String &request) {
 
     EEPROM.write(numCoord, '1');
     handleNumbers(numCoord);
+
+    serverClient.println("HTTP/1.1 200 OK");
+    serverClient.println("Connection: close");
+    serverClient.println();
+
+  } else if (request.startsWith("POST /updateWifi")) {
+    
+    int ssidLen = request.substring().toInt();
+    int passLen = request.substring(ssidLen, ssidLen+2).toInt();
+
+    EEPROM.write(120, ssidLen);
+    EEPROM.write(121, passLen);
+
+    for (int i = 0; i < ssidLen) {
+      EEPROM.write(122 + i, request[2 + i]);
+    }
+
+    for (int i = 0; i < ssidLen) {
+      EEPROM.write(122 + ssidLen + i, request[4 + ssidLen + i]);
+    }
 
     serverClient.println("HTTP/1.1 200 OK");
     serverClient.println("Connection: close");
