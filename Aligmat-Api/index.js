@@ -39,7 +39,9 @@ app.post('/send-sms', (req, res) => {
     return res.status(200).json({ message: 'SMS sending initiated.' });
 });
 
-app.listen(1921);
+app.listen(3000, () => {
+    console.log('Server is running on port 3000');
+});
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
