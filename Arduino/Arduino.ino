@@ -34,8 +34,8 @@ int disFromWLevel = 100;
 
 // Saved Info Storage Variables
 char phoneNumbers[10][11];
-char ssid[35] = "GlobeAtHome_CB529_2.4";
-char pass[66] = "Je6ySPua";
+char ssid[35] = "";
+char pass[66] = "";
 int threshold = 30;
 
 bool once = true;
