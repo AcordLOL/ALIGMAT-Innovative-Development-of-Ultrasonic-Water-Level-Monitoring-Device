@@ -34,9 +34,15 @@ int disFromWLevel = 100;
 
 // Saved Info Storage Variables
 char phoneNumbers[10][11];
-char ssid[35] = "";
-char pass[66] = "";
+char ssid[35] = "wifi";
+char pass[66] = "password";
 int threshold = 30;
+
+const char serverAddress[] = "http://192.168.254.117";
+
+int lstMuteState = 0;
+bool mute = false;
+long cooldown = 0L;
 
 bool once = true;
 
@@ -69,10 +75,6 @@ int lastMode = 1;
 void loop() {
   int currMode = digitalRead(switchPin);
 
-  Serial.print(digitalRead(mutePin));
-  Serial.print(" ");
-  Serial.println(currMode);
-
   if (lastMode != currMode) {
     lastMode = currMode;
 
@@ -89,6 +91,7 @@ void loop() {
       }
 
       Serial.println("Connected To WiFi");
+      delay(1000);
 
     } else {
       WiFi.beginAP("ALIGMAT", "Password");
@@ -101,7 +104,7 @@ void loop() {
   }
 
   if (currMode) {
-  } else configMode();  
+  } else configMode();
 
   // Water Level Detection Runs Every 100 Milliseconds
   long currMill = millis();
@@ -144,12 +147,54 @@ void loop() {
   };
 
   // Alarm System
+  // disFromWLevel = 5;
   if (disFromWLevel < threshold) {
-    tone(speakerPin, 3000); // Speaker Turns On
+    if (!mute) tone(speakerPin, 3000); // Speaker Turns On
 
-    // handleMessage();
+    Serial.println("sending");
+      if (now - cooldown > 5000) {
+        StaticJsonDocument<512> doc;
+        doc["numbers"] = JsonArray();
+        doc["numbers"].add("09916965106");
+        doc["numbers"].add("09916965107");
+        doc["numbers"].add("09916965108");
+
+        String requestBody;
+        serializeJson(doc, requestBody);
+
+        if (client.connect(serverAddress, 3000)) {
+          client.println("POST /send-sms HTTP/1.1");
+          client.println("Content-Type: application/json");
+          client.println("Connection: close");
+          client.println();
+          client.println(requestBody);
+        }
+
+
+      } else {
+        Serial.println("on cooldown");
+      }
+
   } else {
     noTone(speakerPin);
+  }
+
+  // Mute Button
+  const int muteState = digitalRead(mutePin);
+  const long now = millis();
+
+  if (muteState != lstMuteState) {
+    lstMuteState = muteState;
+
+    if (muteState == LOW) {
+      noTone(speakerPin);
+      cooldown = now;
+      mute = true;
+    }
+  }
+
+  if (now - cooldown > 50000) {
+    mute = false;
   }
 }
 

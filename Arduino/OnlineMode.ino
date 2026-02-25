@@ -1,9 +1,9 @@
-void onlineMode() {
-  if (once) {
-    WiFi.begin(ssid, pass);
+// void onlineMode() {
+//   if (once) {
+//     WiFi.begin(ssid, pass);
 
-    if (WiFi.status() == WL_NO_MODULE) {
+//     if (WiFi.status() == WL_NO_MODULE) {
       
-    }
-  }
-}
+//     }
+//   }
+// }
