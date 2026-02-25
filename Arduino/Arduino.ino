@@ -36,7 +36,7 @@ int disFromWLevel = 100;
 char phoneNumbers[10][11];
 char ssid[35] = "wifi";
 char pass[66] = "password";
-int threshold = 30;
+int threshold = 12;
 
 const char serverAddress[] = "http://192.168.254.117";
 
@@ -136,7 +136,7 @@ void loop() {
 
     // When Mode is found or if Readings Reached Max
     if (maxCount > requiredReadings/numUnique || numReadings == requiredReadings) {
-      disFromWLevel = maxValue; // Updates Current the Sensor's Distance from the Water Level
+      disFromWLevel = maxValue + 3; // Updates Current the Sensor's Distance from the Water Level
       Serial.println(disFromWLevel);
 
       // Reset all parameters to prepare for next set
@@ -148,32 +148,32 @@ void loop() {
 
   // Alarm System
   // disFromWLevel = 5;
-  if (disFromWLevel < threshold) {
+  if ((38 - disFromWLevel) > threshold) {
     if (!mute) tone(speakerPin, 3000); // Speaker Turns On
 
-    Serial.println("sending");
-      if (now - cooldown > 5000) {
-        StaticJsonDocument<512> doc;
-        doc["numbers"] = JsonArray();
-        doc["numbers"].add("09916965106");
-        doc["numbers"].add("09916965107");
-        doc["numbers"].add("09916965108");
+    // Serial.println("sending");
+    //   if (now - cooldown > 5000) {
+    //     StaticJsonDocument<512> doc;
+    //     doc["numbers"] = JsonArray();
+    //     doc["numbers"].add("09916965106");
+    //     doc["numbers"].add("09916965107");
+    //     doc["numbers"].add("09916965108");
 
-        String requestBody;
-        serializeJson(doc, requestBody);
+    //     String requestBody;
+    //     serializeJson(doc, requestBody);
 
-        if (client.connect(serverAddress, 3000)) {
-          client.println("POST /send-sms HTTP/1.1");
-          client.println("Content-Type: application/json");
-          client.println("Connection: close");
-          client.println();
-          client.println(requestBody);
-        }
+    //     if (client.connect(serverAddress, 3000)) {
+    //       client.println("POST /send-sms HTTP/1.1");
+    //       client.println("Content-Type: application/json");
+    //       client.println("Connection: close");
+    //       client.println();
+    //       client.println(requestBody);
+    //     }
 
 
-      } else {
-        Serial.println("on cooldown");
-      }
+    //   } else {
+    //     Serial.println("on cooldown");
+    //   }
 
   } else {
     noTone(speakerPin);

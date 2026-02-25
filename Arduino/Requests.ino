@@ -2,7 +2,7 @@ void handleRequest(WiFiClient &serverClient, String &request) {
   if (request.startsWith("GET /waterLevel")) {
     StaticJsonDocument<256> doc;
     
-    doc["waterLevel"] = disFromWLevel;
+    doc["waterLevel"] = 38 - disFromWLevel;
 
     serverClient.println("HTTP/1.1 200 OK");
     serverClient.println("Content-type: application/json");
