@@ -1,12 +1,15 @@
 const express = require('express');
 const moceansdk = require('mocean-sdk');
+// require('dotenv').config();
+
+const SMS_token = process.env.SMS_token
 
 const app = express();
 
 app.use(express.json());
 
 const mocean = new moceansdk.Mocean(
-        new moceansdk.Client({apiToken: "apit-XiYnVxFbWC2C0SwlodeHGCRHFYCAgaR4-iFh30"})
+        new moceansdk.Client({apiToken: SMS_token})
 );
 
 app.get('/', (req, res) => {
