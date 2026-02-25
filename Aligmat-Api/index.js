@@ -1,6 +1,6 @@
 const express = require('express');
 const moceansdk = require('mocean-sdk');
-// require('dotenv').config();
+require('dotenv').config();
 
 const SMS_token = process.env.SMS_token
 
