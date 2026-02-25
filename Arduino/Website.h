@@ -184,13 +184,26 @@ Connection: close
                 getInfo();
             }, 10);
             
-            document.getElementById("save").addEventListener("click", saveNumber);
-            document.getElementById("send").addEventListener("click", sendMSG);
+            document.getElementById("save_number").addEventListener("click", saveNumber);
             document.getElementById("input_num").addEventListener("keyup", function(event) {
                 if (event.key != "Enter") return;
                 
                 event.preventDefault();
-                document.getElementById("save").click();
+                document.getElementById("save_number").click();
+            })
+            
+            document.getElementById("save_wifi").addEventListener("click", saveWifi);
+            document.getElementById("input_ssid").addEventListener("keyup", function(event) {
+                if (event.key != "Enter") return;
+                
+                event.preventDefault();
+                document.getElementById("input_pass").focus();
+            })
+            document.getElementById("input_pass").addEventListener("keyup", function(event) {
+                if (event.key != "Enter") return;
+                
+                event.preventDefault();
+                document.getElementById("save_wifi").click();
             })
 
             function getInfo() {

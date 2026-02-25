@@ -1,14 +1,4 @@
-int status = WL_IDLE_STATUS;
-
 void configMode() {
-  if (once) {
-    status = WiFi.beginAP("ALIGMAT", "Password");
-
-    delay(1000);
-    server.begin();
-    // digitalWrite(config[1], HIGH);
-  }
-
   WiFiClient serverClient = server.available();
   if (serverClient) {
     String currentLine = "";
