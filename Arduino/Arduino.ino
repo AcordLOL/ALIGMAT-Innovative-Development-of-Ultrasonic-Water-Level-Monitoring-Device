@@ -1,15 +1,12 @@
-
 // Libraries and Other Resources
-#include <R4HttpClient.h>
 #include <ArduinoJson.h>
 #include <EEPROM.h>
-
+#include "WiFiS3.h"
 #include "Website.h"
 
 // Initializing Servers
 WiFiServer server(80);
-WiFiSSLClient client;
-R4HttpClient http;
+WiFiClient client;
 
 // Defining Pin Connections
 const int baudRate = 9600;
@@ -30,20 +27,21 @@ int maxValue = 0;
 long savedMill = 0; 
 
 // Distance of Sensor from the Water Level
+const int threshold = 12;
+const int bottom = 38;
 int disFromWLevel = 100;
 
 // Saved Info Storage Variables
 char phoneNumbers[10][11];
 char ssid[35] = "wifi";
 char pass[66] = "password";
-int threshold = 12;
 
-const char serverAddress[] = "http://192.168.254.117";
 
+// States and Cooldowns
 int lstMuteState = 0;
-bool mute = false;
+int lstMode = 1; 
 long cooldown = 0L;
-
+bool mute = false;
 bool once = true;
 
 void setup() {
@@ -70,8 +68,6 @@ void setup() {
   }
 }
 
-int lastMode = 1; 
-
 void loop() {
   int currMode = digitalRead(switchPin);
 
@@ -83,6 +79,7 @@ void loop() {
     delay(1000);
 
     if (currMode) {
+      // Login to Wifi
       WiFi.begin(ssid, pass);
 
       while (WiFi.status() != WL_CONNECTED) {
@@ -94,6 +91,7 @@ void loop() {
       delay(1000);
 
     } else {
+      // Host Wifi
       WiFi.beginAP("ALIGMAT", "Password");
 
       delay(5000);
@@ -104,7 +102,44 @@ void loop() {
   }
 
   if (currMode) {
-  } else configMode();
+
+  } else {
+    WiFiClient serverClient = server.available();
+
+    // Check for Server Client
+    if (serverClient) {
+      // Parsed Data Placeholders
+      String currentLine = "";
+      String request = "";
+
+      // Loop when Client is connected
+      while (serverClient.connected()) {
+        delayMicroseconds(10); // 10 Microsecond buffer
+        if (!serverClient.available()) continue; // Continue to next loop when Server Client is Unavailable
+
+        // Collect Sent-Over Data Characters
+        char c = serverClient.read();
+        if (c != '\n') {
+          if (c != '\r') currentLine += c;
+          continue;
+        }
+
+        // Define request type
+        if (currentLine.startsWith("GET") || currentLine.startsWith("POST"))
+          request = currentLine;
+
+        if (currentLine.length() == 0) {
+          handleRequest(serverClient, request);
+    
+          break;
+        } else {
+          currentLine = "";
+        }
+      }
+
+      serverClient.stop();
+    }
+  }
 
   // Water Level Detection Runs Every 100 Milliseconds
   long currMill = millis();
@@ -149,31 +184,31 @@ void loop() {
   // Alarm System
   // disFromWLevel = 5;
   if ((38 - disFromWLevel) > threshold) {
-    if (!mute) tone(speakerPin, 3000); // Speaker Turns On
+    // if (!mute) tone(speakerPin, 3000); // Speaker Turns On
 
-    // Serial.println("sending");
-    //   if (now - cooldown > 5000) {
-    //     StaticJsonDocument<512> doc;
-    //     doc["numbers"] = JsonArray();
-    //     doc["numbers"].add("09916965106");
-    //     doc["numbers"].add("09916965107");
-    //     doc["numbers"].add("09916965108");
+    Serial.println("sending");
+      if (now - cooldown > 5000) {
+        StaticJsonDocument<512> doc;
+        doc["numbers"] = JsonArray();
+        doc["numbers"].add("09916965106");
+        doc["numbers"].add("09916965107");
+        doc["numbers"].add("09916965108");
 
-    //     String requestBody;
-    //     serializeJson(doc, requestBody);
+        String requestBody;
+        serializeJson(doc, requestBody);
 
-    //     if (client.connect(serverAddress, 3000)) {
-    //       client.println("POST /send-sms HTTP/1.1");
-    //       client.println("Content-Type: application/json");
-    //       client.println("Connection: close");
-    //       client.println();
-    //       client.println(requestBody);
-    //     }
+        if (client.connect(serverAddress, 3000)) {
+          client.println("POST /send-sms HTTP/1.1");
+          client.println("Content-Type: application/json");
+          client.println("Connection: close");
+          client.println();
+          client.println(requestBody);
+        }
 
 
-    //   } else {
-    //     Serial.println("on cooldown");
-    //   }
+      } else {
+        Serial.println("on cooldown");
+      }
 
   } else {
     noTone(speakerPin);
@@ -193,18 +228,19 @@ void loop() {
     }
   }
 
+  // Turn off mute after 50 seconds
   if (now - cooldown > 50000) {
     mute = false;
   }
 }
 
-// Updates numbersk
+// Updates numbers
 void handleNumbers(int coordinate) {
   int hasNum = EEPROM.read(coordinate); // Check if number exists at EEPROM coordinate
   if (!hasNum) return; // Returns if no number at coordinate
 
   phoneNumbers[9][0] = hasNum; // Cache Number State
-  for (int digit = 0; digit < 9;digit++) {
+  for (int digit = 0; digit < 9; digit++) {
 
       // Writes Every Digit if Number Exists and 0 if it Doesn't
       phoneNumbers[coordinate-1][digit+1] = (hasNum) ? EEPROM.read(coordinate*9 + digit + 2) : '0';
