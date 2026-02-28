@@ -35,7 +35,7 @@ void handleRequest(WiFiClient &serverClient, String &request) {
       EEPROM.write(numCoord*9 + 2 + i, request[16 + i]);
     }
 
-    EEPROM.write(numCoord, '1');
+    EEPROM.write(numCoord, 1);
     handleNumbers(numCoord);
 
     serverClient.println("HTTP/1.1 200 OK");
@@ -79,7 +79,7 @@ void handleRequest(WiFiClient &serverClient, String &request) {
     
     int numCoord = request.substring(19, 21).toInt();
 
-    EEPROM.write(numCoord, '0');
+    EEPROM.write(numCoord, 0);
     handleNumbers(numCoord);
 
     serverClient.println("HTTP/1.1 200 OK");

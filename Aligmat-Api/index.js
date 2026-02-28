@@ -1,35 +1,32 @@
 const express = require('express');
 const moceansdk = require('mocean-sdk');
-require('dotenv').config();
-
-const SMS_token = process.env.SMS_token
 
 const app = express();
 
 app.use(express.json());
 
 const mocean = new moceansdk.Mocean(
-        new moceansdk.Client({apiToken: SMS_token})
+    new moceansdk.Client({
+        apiToken: "apit-TUPL1LraxHrOg7Bt0FvQna1CUxhDzUwg-E9PtK"
+    })
 );
 
 app.get('/', (req, res) => {
     res.send('ALIGMAT WARNING SYSTEM');
 });
 
-app.post('/send-sms', (req, res) => {
-    const { numbers } = req.body;
+app.post('/send-sms', async (req, res) => {
+    const { numbers, water_level } = req.body;
 
     numbers.forEach(async (number) => {
-        // if (number != '639916965106') return console.log(`Skipping number ${number} as it is not the target number.`);
-        
-        // mocean.sms().send({
-        //     'mocean-from': 'ALIGMAT',
-        //     'mocean-to': number,
-        //     'mocean-text': 'ALIGMAT WARNING SYSTEM: JEZZ ANG IMO TOILET GABAHA!!!'
-        // }, function(err, res) {
-        //     if(err) throw err;
-        //     console.log(res);
-        // });
+        mocean.sms().send({
+            'mocean-from': 'MOCEAN',
+            'mocean-to': number,
+            'mocean-text': `ALIGMAT!: THE WATER LEVEL HAS REACHED ${water_level} CM. PLEASE TAKE NECESSARY PRECAUTIONS AND STAY ALERT. `
+        }, function(err, res) {
+            if(err) throw err;
+            console.log(res);
+        });
         
         console.log(`Sending SMS to ${number}...`);
         await delay(10000);
