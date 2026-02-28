@@ -32,14 +32,13 @@ app.post('/send-sms', (req, res) => {
         // });
         
         console.log(`Sending SMS to ${number}...`);
-
         await delay(10000);
     });
 
     return res.status(200).json({ message: 'SMS sending initiated.' });
 });
 
-app.listen(3000, () => {
+app.listen(3000, "0.0.0.0",() => {
     console.log('Server is running on port 3000');
 });
 
