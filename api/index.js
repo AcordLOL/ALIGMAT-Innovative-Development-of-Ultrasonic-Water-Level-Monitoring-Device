@@ -25,6 +25,7 @@ setInterval(() => {
     clients.forEach(client => {
         client.write(`data: ${data}\n\n`);
     });
+
 }, 2000);
 
 app.get('/', (req, res) => {
@@ -34,24 +35,12 @@ app.get('/', (req, res) => {
 let clients = [];
 
 app.get('/water-level', (req, res) => {
-    // res.set({
-    //     'Content-Type': 'application/json',
-    //     'Connection': 'keep-alive',
-    //     'Keep-Alive': 'timeout=5, max=1000'
-    // });
-
-    // res.json({
-    //     level: waterLevel.toFixed(2),
-    //     unit: 'cm',
-    //     timestamp: new Date().toISOString()
-    // });
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
     clients.push(res);
-    console.log(res);
 
     req.on('close', () => {
         clients = clients.filter(client => client !== res);
