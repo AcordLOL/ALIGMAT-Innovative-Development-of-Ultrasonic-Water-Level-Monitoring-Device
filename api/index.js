@@ -8,7 +8,8 @@ dotenv.config();
 const app = express();
 app.use(express.json());;
 app.use(cors({
-    origin: 'https://aligmatonline.vercel.app',
+    // origin: 'https://aligmatonline.vercel.app',
+    origin: '*',
 }));;
 
 let waterLevel = 0;
@@ -18,7 +19,7 @@ setInterval(() => {
     waterLevel = Math.max(0, Math.min(100, waterLevel + (Math.random() * 4 - 2)));
 
     data = JSON.stringify({
-        level: waterLevel.toFixed(2),
+        level: Math.floor(waterLevel).toFixed(2),
         timestamp: new Date().toISOString()
     });
 

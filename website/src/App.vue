@@ -68,7 +68,8 @@ const chartData = ref({
       backgroundColor: '#54bc69',
       borderColor: '#54bc69',
       data: waterLevelHistory.value,
-      fill: false
+      fill: false,
+      tension: 0.4, // Adds a slight curve to the line for a smoother appearance
     }
   ]
 });
