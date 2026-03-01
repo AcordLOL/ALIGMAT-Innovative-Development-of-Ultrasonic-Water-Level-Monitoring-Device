@@ -246,8 +246,10 @@ Connection: close
 
             function updateWifi(ssid, pass) {
                 const wifi_info = document.getElementById("wifi_info");
+
+                const asterisks = "*".repeat(pass.length);
                 
-                wifi_info.innerHTML = `<h3>Wifi: ${ssid}<br>Password: ${pass}</h3>`
+                wifi_info.innerHTML = `<h3>Wifi: ${ssid}<br>Password: ${asterisks}</h3>`
             }
 
             function deleteNumber(index) {

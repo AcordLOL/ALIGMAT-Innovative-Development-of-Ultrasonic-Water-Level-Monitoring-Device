@@ -8,7 +8,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());;
 app.use(cors({
-    origin: 'https://aligmatonline.vercel.app'
+    origin: 'https://aligmatonline.vercel.app',
 }));;
 
 let waterLevel = 0;
@@ -25,7 +25,6 @@ setInterval(() => {
     clients.forEach(client => {
         client.write(`data: ${data}\n\n`);
     });
-
 }, 2000);
 
 app.get('/', (req, res) => {
@@ -54,10 +53,24 @@ app.post('/water-level', async (req, res) => {
     waterLevel = water_level;
 });
 
+let once = false
+
 app.post('/send-sms', async (req, res) => {
     res.status(200).json({ message: 'SMS sending initiated.' }).send()
+
+    if (once) return;
+    once = true;
+    const { water_level } = req.body;
+    const numbers = [
+        "639660567195",
+        "639157423931",
+        "639949442301",
+        "639052720964",
+        "639458779497",
+    ]
     
-    const { numbers, water_level } = req.body;
+    // console.log(numbers);
+    // return; 
     const url = 'https://dashboard.philsms.com/api/v3/sms/send';
 
     const payload = {

@@ -10,7 +10,7 @@ WiFiServer accessPoint(80);
 WiFiClient client;
 
 const int baudRate = 9600;
-const char server[] = "192.168.1.47";
+const char server[] = "";
 const int port = 3000;
 
 // Defining Pin Connections
@@ -31,7 +31,7 @@ int maxValue = 0;
 long savedMill = 0; 
 
 // Distance of Sensor from the Water Level
-const int threshold = 12;
+const int threshold = 17;
 const int bottom = 54;
 int waterLevel = 0;
 
@@ -49,7 +49,8 @@ char phoneNumbers[10][11] = {
   "0000000000"
 };
 char ssid[33] = "";
-char passLen[64] = "";
+char pass[64] = "";
+
 // States and Cooldowns
 int lstMuteState = 0;
 int lstMode = 2; 
@@ -86,6 +87,8 @@ void setup() {
 }
 
 void loop() {
+  Serial.println(waterLevel);
+
   int currMode = digitalRead(switchPin);
 
   if (lstMode != currMode) {
@@ -96,9 +99,7 @@ void loop() {
     delay(1000);
 
     if (currMode) {
-      // Login to WifissidLen = 
-      WiFi., passLenread
-      while() != WL_CONNECTED) {
+      while(WiFi.begin(ssid, pass) != WL_CONNECTED) {
         delay(500);
         Serial.print(".");
       }
@@ -121,10 +122,7 @@ void loop() {
   if (currMode && now - wlvlCooldown > 2000) {
     if (client.connect(server, port)) {
       wlvlCooldown = now;
-      Serial.print("updated: ");
-      Serial.println(waterLevel);
-
-      JsonPackage += " { \"water_level\": ";
+      String JsonPackage = " { \"water_level\": ";
       JsonPackage += String(waterLevel);
       JsonPackage += " }";
 
@@ -232,7 +230,6 @@ void loop() {
 
     if (currMode && !onCooldown) {
       if (client.connect(server, port)) {
-        Serial.println("Connected to Server!");
         onCooldown = true;
         smsCooldown = now;
 
@@ -240,18 +237,18 @@ void loop() {
         for (int i = 0; i < 10; i++) {
           if (phoneNumbers[i][0] == '0') continue;
           
-          char num[12];
+          // char num[12];
 
-          for (int n = 0; n < 9; n++) {
-            num[n+3] = phoneNumbers[i][n+1];
-          }
+          // for (int n = 0; n < 9; n++) {
+          //   num[n+3] = phoneNumbers[i][n+1];
+          // }
 
-          num[0] = '6';
-          num[1] = '3';
-          num[2] = '9';
-          num[12] = '\0';
+          // num[0] = '6';
+          // num[1] = '3';
+          // num[2] = '9';
+          // num[12] = '\0';
 
-          JsonPackage += num;
+          JsonPackage += phoneNumbers[i];
           JsonPackage += ", ";
         }
         JsonPackage.remove(JsonPackage.length() - 2);
@@ -323,8 +320,8 @@ void handleWiFi() {
   char _ssid[33];
   char _pass[64];
 
-  ssidLen = EEPROM.read(120);
-  passLen = EEPROM.read(121);
+  int ssidLen = EEPROM.read(120);
+  int passLen = EEPROM.read(121);
 
   for (int i = 0; i < ssidLen; i++) {
     _ssid[i] = EEPROM.read(122 + i);
@@ -337,8 +334,8 @@ void handleWiFi() {
   _ssid[ssidLen] = '\0';
   _pass[passLen] = '\0';
 
-  strcpy(ssidLen, _ssid);
-  strcpy(passLen, _pass);
+  strcpy(ssid, _ssid);
+  strcpy(pass, _pass);
 }
 
 void handleError(const char* msg) {
