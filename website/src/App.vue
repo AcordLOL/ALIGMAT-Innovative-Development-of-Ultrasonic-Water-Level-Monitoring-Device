@@ -54,7 +54,7 @@ const evenSource = ref(null);
 
 onMounted(() => {
 
-  evenSource.value = new EventSource(url+"/stream", {
+  evenSource.value = new EventSource(url+"/water-level", {
     headers: {
       'Accept': 'text/event-stream',
       'Connection': 'keep-alive',
