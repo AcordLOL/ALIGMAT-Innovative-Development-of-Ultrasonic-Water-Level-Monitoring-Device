@@ -51,6 +51,7 @@ app.get('/water-level', (req, res) => {
     res.flushHeaders();
 
     clients.push(res);
+    console.log(res);
 
     req.on('close', () => {
         clients = clients.filter(client => client !== res);
