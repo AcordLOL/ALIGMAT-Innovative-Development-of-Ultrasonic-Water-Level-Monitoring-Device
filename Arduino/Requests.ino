@@ -19,6 +19,9 @@ void handleRequest(WiFiClient &serverClient, String &request) {
       doc["numbers"][i] = phoneNumbers[i];
     }
 
+    doc["wifi"]["ssid"] = ssid;
+    doc["wifi"]["pass"] = pass;
+
     serverClient.println("HTTP/1.1 200 OK");
     serverClient.println("Content-type: application/json");
     serverClient.println("Connection: close");
@@ -45,8 +48,8 @@ void handleRequest(WiFiClient &serverClient, String &request) {
   } else if (request.startsWith("POST /updateWifi")) {
     int ssidLen = request.substring(17, 19).toInt();
     int passLen = request.substring(19 + ssidLen, ssidLen+21).toInt();
-    char _ssid[35];
-    char _pass[66];
+    char _ssid[33];
+    char _pass[64];
 
     EEPROM.write(120, ssidLen);
     EEPROM.write(121, passLen);

@@ -48,14 +48,14 @@ char phoneNumbers[10][11] = {
   "0000000000",
   "0000000000"
 };
-char ssid[35] = "G/EPON ONU";
-char pass[66] = "gracenoguid0119";
-
+char ssid[33] = "";
+char passLen[64] = "";
 // States and Cooldowns
 int lstMuteState = 0;
 int lstMode = 2; 
 long muteCooldown = 0;
 long smsCooldown = 0;
+long wlvlCooldown = 0;
 long now = 0;
 bool mute = false;
 bool onCooldown = false;
@@ -96,10 +96,9 @@ void loop() {
     delay(1000);
 
     if (currMode) {
-      // Login to Wifi
-      WiFi.begin(ssid, pass);
-
-      while (WiFi.status() != WL_CONNECTED) {
+      // Login to WifissidLen = 
+      WiFi., passLenread
+      while() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");
       }
@@ -118,9 +117,32 @@ void loop() {
     }
   }
 
-  if (currMode) {
+  now = millis();
+  if (currMode && now - wlvlCooldown > 2000) {
+    if (client.connect(server, port)) {
+      wlvlCooldown = now;
+      Serial.print("updated: ");
+      Serial.println(waterLevel);
 
-  } else {
+      JsonPackage += " { \"water_level\": ";
+      JsonPackage += String(waterLevel);
+      JsonPackage += " }";
+
+      client.println("POST /water-level HTTP/1.1");
+      client.print("HOST: ");
+      client.println(server);
+      client.println("Content-Type: application/json");
+      client.print("Content-Length: ");
+      client.println(JsonPackage.length());
+      client.println("Connection: close");
+      client.println();
+      client.println(JsonPackage);
+
+      client.stop();
+    } else {
+      Serial.println("Connection Failed!");
+    }
+  } else if (!currMode) {
     WiFiClient serverClient = accessPoint.available();
 
     // Check for Server Client
@@ -297,7 +319,28 @@ void handleNumbers(int coordinate) {
   Serial.println(phoneNumbers[coordinate-1]);
 }
 
-// Error Handler
+void handleWiFi() {
+  char _ssid[33];
+  char _pass[64];
+
+  ssidLen = EEPROM.read(120);
+  passLen = EEPROM.read(121);
+
+  for (int i = 0; i < ssidLen; i++) {
+    _ssid[i] = EEPROM.read(122 + i);
+  }
+
+  for (int i = 0; i < passLen; i++) {
+    _pass[i] = EEPROM.read(122 + ssidLen + i);
+  }
+
+  _ssid[ssidLen] = '\0';
+  _pass[passLen] = '\0';
+
+  strcpy(ssidLen, _ssid);
+  strcpy(passLen, _pass);
+}
+
 void handleError(const char* msg) {
   Serial.println(msg);
 

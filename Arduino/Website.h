@@ -221,6 +221,7 @@ Connection: close
                         savedNumbers[i] = e;
                     })
                     updateNumbers();
+                    updateWifi(data.wifi.ssid, data.wifi.pass);
                 };
                 
                 Request.open("GET", "info", true);
