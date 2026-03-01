@@ -7,30 +7,53 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());;
-app.use(cors());;
+app.use(cors({
+    origin: 'https://aligmatonline.vercel.app'
+}));;
 
 let waterLevel = 0;
 const port = 3000;
 
 setInterval(() => {
     waterLevel = Math.max(0, Math.min(100, waterLevel + (Math.random() * 4 - 2)));
+
+    data = JSON.stringify({
+        level: waterLevel.toFixed(2),
+        timestamp: new Date().toISOString()
+    });
+
+    clients.forEach(client => {
+        client.write(`data: ${data}\n\n`);
+    });
 }, 2000);
 
 app.get('/', (req, res) => {
     res.send('Welcome to the Aligmat API. Use /water-level to get the current water level.');
 });
 
-app.get('/water-level', (req, res) => {
-    res.set({
-        'Content-Type': 'application/json',
-        'Connection': 'keep-alive',
-        'Keep-Alive': 'timeout=5, max=1000'
-    });
+let clients = [];
 
-    res.json({
-        level: waterLevel.toFixed(2),
-        unit: 'cm',
-        timestamp: new Date().toISOString()
+app.get('/water-level', (req, res) => {
+    // res.set({
+    //     'Content-Type': 'application/json',
+    //     'Connection': 'keep-alive',
+    //     'Keep-Alive': 'timeout=5, max=1000'
+    // });
+
+    // res.json({
+    //     level: waterLevel.toFixed(2),
+    //     unit: 'cm',
+    //     timestamp: new Date().toISOString()
+    // });
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    clients.push(res);
+
+    req.on('close', () => {
+        clients = clients.filter(client => client !== res);
     });
 });
 

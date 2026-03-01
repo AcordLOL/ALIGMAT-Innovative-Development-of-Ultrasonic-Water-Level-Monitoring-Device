@@ -23,36 +23,64 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 
 const url = 'https://untraveled-lingually-melda.ngrok-free.dev';
 
 const waterLevel = ref('pending...');
 const lastUpdated = ref('--');
 const connected = ref(false);
+const evenSource = ref(null);
 
-const fetchData = async () => {
-  try {
-    const response = await fetch(url+"/water-level", {
-      headers: {
-        'Accept': 'application/json',
-        'Connection': 'keep-alive',
-        'ngrok-skip-browser-warning': 'true'
-      }
-    });
-    const data = await response.json();
+// const fetchData = async () => {
+//   try {
+//     const response = await fetch(url+"/water-level", {
+//       headers: {
+//         'Accept': 'application/json',
+//         'Connection': 'keep-alive',
+//         'ngrok-skip-browser-warning': 'true'
+//       }
+//     });
+//     const data = await response.json();
     
+//     waterLevel.value = data.level + " cm";
+//     lastUpdated.value = new Date(data.timestamp).toLocaleTimeString();
+//     connected.value = true;
+//   } catch (error) {
+//     console.error("Polling error:", error);
+//     connected.value = false;
+//   }
+// };
+
+onMounted(() => {
+
+  evenSource.value = new EventSource(url+"/stream", {
+    headers: {
+      'Accept': 'text/event-stream',
+      'Connection': 'keep-alive',
+      'ngrok-skip-browser-warning': 'true'
+    }
+  });
+
+  evenSource.value.onmessage = (event) => {
+    const data = JSON.parse(event.data);
     waterLevel.value = data.level + " cm";
     lastUpdated.value = new Date(data.timestamp).toLocaleTimeString();
     connected.value = true;
-  } catch (error) {
-    console.error("Polling error:", error);
-    connected.value = false;
-  }
-};
+  };
 
-onMounted(() => {
-  fetchData();
-  setInterval(fetchData, 2000);
+  evenSource.value.onerror = (error) => {
+    console.error("SSE error:", error);
+    connected.value = false;
+  };
+  
+  // fetchData();
+  // setInterval(fetchData, 2000);
+});
+
+onUnmounted(() => {
+  if (evenSource.value) {
+    evenSource.value.close();
+  }
 });
 </script>
