@@ -12,17 +12,17 @@ app.use(cors({
     origin: '*',
 }));;
 
-let waterLevel = 0;
+let waterLevel = 12;
 const port = 3000;
 
 setInterval(() => {
-    waterLevel = Math.max(0, Math.min(100, waterLevel + (Math.random() * 4 - 2)));
+    waterLevel =Math.max(0, Math.min(100, waterLevel + (Math.random() * 4 - 2)));
 
     data = JSON.stringify({
         level: Math.floor(waterLevel).toFixed(2),
         timestamp: new Date().toISOString()
     });
-
+    
     clients.forEach(client => {
         client.write(`data: ${data}\n\n`);
     });
@@ -54,10 +54,15 @@ app.post('/water-level', async (req, res) => {
     waterLevel = water_level;
 });
 
-let once = false
+let once = true;
+
+setTimeout(() => {
+    once = false;
+}, 120000); // Reset the once flag every 60 seconds
 
 app.post('/send-sms', async (req, res) => {
     res.status(200).json({ message: 'SMS sending initiated.' }).send()
+    // return;
 
     if (once) return;
     once = true;

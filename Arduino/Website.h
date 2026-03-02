@@ -146,9 +146,23 @@ Connection: close
                 <div class="tag">
                     <h1>Water level:</h1>
                     <h1 id="display">pending...</h1>
-                    </div>
                 </div>
-                <div class="container stack" id="number">
+            </div>
+            <div class="container stack" id="number">
+                <div class="tag">
+                    <h1>Device Callibration</h1>
+                    <p>The Flood Monitoring Device callibration to function.<br>Provide information regarding the bottom and threshold</p>
+                </div>
+                <div id="device_info" class="list">
+                    <h3>Bottom Level: pending...<br>Treshold Level: pending...</h3>
+                </div>
+                <input id="input_bottom" placeholder="Bottom Level" type="text">
+                <input id="input_threshold" placeholder="Threshold Level" type="text">
+                <div id="save_cal" class="btn">
+                    <h3>Save</h3>
+                </div>
+            </div>
+            <div class="container stack" id="number">
                     <div class="tag">
                         <h1>SMS Warning</h1>
                         <p>The Flood Monitoring Device can warn users through SMS.<br>Provide phone numbers to enable...</p>
@@ -178,6 +192,8 @@ Connection: close
             </div>
             <script>
             let savedNumbers = [];
+            let bottom = 0;
+            let threshold = 0;
 
             setInterval(getWaterLevel, 1000);
             setTimeout(() => {
@@ -206,6 +222,20 @@ Connection: close
                 document.getElementById("save_wifi").click();
             })
 
+            document.getElementById("save_cal").addEventListener("click", saveCal);
+            document.getElementById("input_bottom").addEventListener("keyup", function(event) {
+                if (event.key != "Enter") return;
+                
+                event.preventDefault();
+                document.getElementById("input_threshold").focus();
+            })
+            document.getElementById("input_threshold").addEventListener("keyup", function(event) {
+                if (event.key != "Enter") return;
+                
+                event.preventDefault();
+                document.getElementById("save_cal").click();
+            })
+
             function getInfo() {
                 const Request = new XMLHttpRequest();
                 Request.onreadystatechange = function() {
@@ -222,6 +252,10 @@ Connection: close
                     })
                     updateNumbers();
                     updateWifi(data.wifi.ssid, data.wifi.pass);
+
+                    bottom = data.cal.bottom;
+                    threshold = data.cal.threshold;
+                    updateCal();
                 };
                 
                 Request.open("GET", "info", true);
@@ -250,6 +284,12 @@ Connection: close
                 const asterisks = "*".repeat(pass.length);
                 
                 wifi_info.innerHTML = `<h3>Wifi: ${ssid}<br>Password: ${asterisks}</h3>`
+            }
+
+            function updateCal() {
+                const device_info = document.getElementById("device_info");
+                
+                device_info.innerHTML = `<h3>Bottom Level: ${bottom} cm<br>Threshold Level: ${threshold} cm</h3>`
             }
 
             function deleteNumber(index) {
@@ -283,12 +323,12 @@ Connection: close
                     number.length != 9 ||
                     savedNumbers.includes('1' + number)
                 ) {
-                    updateBtn("save", "Error", "Invalid Number!", "Save")
+                    updateBtn("save_number", "Error", "Invalid Number!", "Save")
                     return
                 }
                 
                 let coord = ''
-                // savedNumbers.push('09' + number);
+                savedNumbers.push('09' + number);
 
                 for (i = 0; i < 10; i++) {
                     if (savedNumbers[i].startsWith("0")) {
@@ -299,7 +339,7 @@ Connection: close
 
                         break;
                     } else if (i == 9) {
-                        updateBtn("save", "error", "Max Numbers Reached!", "Save")
+                        updateBtn("save_number", "error", "Max Numbers Reached!", "Save")
                         return
                     }
                 }
@@ -336,6 +376,33 @@ Connection: close
                 sendRequest.open(
                     "POST",
                     `updateWifi?${ssidLen}${ssid}${passLen}${pass}`,
+                    true
+                )
+                sendRequest.send();
+            
+            }
+            function saveCal() {
+                bottom = document.getElementById("input_bottom").value;
+                threshold = document.getElementById("input_threshold").value;
+
+                if (!Number.isFinite(bottom) || !Number.isFinite(threshold)) {
+                    updateBtn("save_cal", "error", "Invalid Input!", "Save")
+                    return
+                }
+
+                const bottomLen = (bottom.length > 9) ? `${bottom.length}` : `0${bottom.length}`;
+                const thresholdLen = (threshold.length > 9) ? `${threshold.length}` : `0${threshold.length}`;
+
+                updateCal(bottom, threshold);
+
+                const sendRequest = new XMLHttpRequest();
+                sendRequest.onreadystatechange = function() {
+                    if (this.readyState !== XMLHttpRequest.DONE || this.status !== 200) return;
+                    console.log(this.responseType);
+                }
+                sendRequest.open(
+                    "POST",
+                    `updateCal?${bottomLen}${bottom}${thresholdLen}${threshold}`,
                     true
                 )
                 sendRequest.send();

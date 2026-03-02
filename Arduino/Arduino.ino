@@ -10,8 +10,19 @@ WiFiServer accessPoint(80);
 WiFiClient client;
 
 const int baudRate = 9600;
-const char server[] = "";
+const char server[] = "10.132.185.14";
 const int port = 3000;
+
+// States and Cooldowns
+int lstMuteState = 0;
+int lstMode = 2; 
+long muteCooldown = 0;
+long smsCooldown = 0;
+long wlvlCooldown = 0;
+long now = 0;
+bool mute = false;
+bool onCooldown = false;
+bool once = true;
 
 // Defining Pin Connections
 const int speakerPin = 8;
@@ -31,7 +42,7 @@ int maxValue = 0;
 long savedMill = 0; 
 
 // Distance of Sensor from the Water Level
-const int threshold = 17;
+const int threshold = 12;
 const int bottom = 54;
 int waterLevel = 0;
 
@@ -51,16 +62,6 @@ char phoneNumbers[10][11] = {
 char ssid[33] = "";
 char pass[64] = "";
 
-// States and Cooldowns
-int lstMuteState = 0;
-int lstMode = 2; 
-long muteCooldown = 0;
-long smsCooldown = 0;
-long wlvlCooldown = 0;
-long now = 0;
-bool mute = false;
-bool onCooldown = false;
-bool once = true;
 
 void setup() {
   pinMode(echoPin, INPUT);
@@ -87,8 +88,6 @@ void setup() {
 }
 
 void loop() {
-  Serial.println(waterLevel);
-
   int currMode = digitalRead(switchPin);
 
   if (lstMode != currMode) {
@@ -270,15 +269,11 @@ void loop() {
       } else {
         Serial.println("Connection Failed!");
       }
-    } else {
-      if (currMode && onCooldown) Serial.println("On Cooldown!");
     }
   } else noTone(speakerPin);
 
   // Mute Button
   const int muteState = digitalRead(mutePin);
-  now = millis();
-
   if (muteState != lstMuteState) {
     lstMuteState = muteState;
 
@@ -290,6 +285,7 @@ void loop() {
   }
 
   // Turn off mute after 50 seconds
+  now = millis();
   if (mute && now - muteCooldown > 50000) {
     mute = false;
   }
